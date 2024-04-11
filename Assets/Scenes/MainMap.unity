@@ -282,6 +282,11 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!4 &817215487 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 808626074132706055, guid: cd945301a1baba14d8ed229d0879a6cf, type: 3}
+  m_PrefabInstance: {fileID: 8010898565235565645}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &876138052 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5338732031749755058, guid: ba46d60b8ca9f0541a2a8ef79e10dac2, type: 3}
@@ -381,7 +386,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8738219146449590519, guid: ba46d60b8ca9f0541a2a8ef79e10dac2, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.7457232
+      value: -1.01
       objectReference: {fileID: 0}
     - target: {fileID: 8738219146449590519, guid: ba46d60b8ca9f0541a2a8ef79e10dac2, type: 3}
       propertyPath: m_LocalPosition.z
@@ -516,16 +521,24 @@ PrefabInstance:
       value: Fish
       objectReference: {fileID: 0}
     - target: {fileID: 6148578023363836895, guid: ba46d60b8ca9f0541a2a8ef79e10dac2, type: 3}
+      propertyPath: foodFish
+      value: 
+      objectReference: {fileID: 817215487}
+    - target: {fileID: 6148578023363836895, guid: ba46d60b8ca9f0541a2a8ef79e10dac2, type: 3}
       propertyPath: FishRigidbody
       value: 
       objectReference: {fileID: 1151136289}
+    - target: {fileID: 6148578023363836895, guid: ba46d60b8ca9f0541a2a8ef79e10dac2, type: 3}
+      propertyPath: detectionRadius
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 8738219146449590519, guid: ba46d60b8ca9f0541a2a8ef79e10dac2, type: 3}
       propertyPath: m_LocalPosition.x
       value: -2.08
       objectReference: {fileID: 0}
     - target: {fileID: 8738219146449590519, guid: ba46d60b8ca9f0541a2a8ef79e10dac2, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.7457232
+      value: -1.02
       objectReference: {fileID: 0}
     - target: {fileID: 8738219146449590519, guid: ba46d60b8ca9f0541a2a8ef79e10dac2, type: 3}
       propertyPath: m_LocalPosition.z
@@ -580,7 +593,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 808626074132706055, guid: cd945301a1baba14d8ed229d0879a6cf, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.39
+      value: 0.06
       objectReference: {fileID: 0}
     - target: {fileID: 808626074132706055, guid: cd945301a1baba14d8ed229d0879a6cf, type: 3}
       propertyPath: m_LocalPosition.y

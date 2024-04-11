@@ -5,12 +5,16 @@ using System.Threading;
 
 public class Fish : MonoBehaviour
 {
-    public Rigidbody2D FishRigidbody;
+    public Rigidbody2D FishRigidbody; // Reference to the fish rigidbody
+    public float detectionRadius = 2f; // Radius of the detection area
+    private float moveSpeed = 5f;
 
     private Thread fishThread;
     private bool isRunning = true;
 
-    private float moveSpeed = 5f;
+    private bool foodFishNearby = false;
+    private object lockObject = new object(); // Object to lock access to shared data
+
 
 
     // Start is called before the first frame update
@@ -23,21 +27,53 @@ public class Fish : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-
+        bool nearby;
+        lock (lockObject)
+        {
+            nearby = foodFishNearby;
+        }
+        if (nearby)
+        {
+            Debug.Log("FoodFish is nearby!");
+            // Implement logic to move towards the foodFish or perform some action
+        }
     }
 
     private void FishThreadFunction()
     {
         while (isRunning)
         {
-            // Implémentation de la logique de déplacement du poisson
-            // et de la détection de nourriture
-            // ...
+            // Check for objects nearby on the Unity main thread
+            UnityThreadHelper.ExecuteOnMainThread(() =>
+            {
+                bool isNearby = CheckFoodFishNearby();
+                lock (lockObject)
+                {
+                    foodFishNearby = isNearby;
+                }
+            });
 
-          //  Debug.Log("Hello: ");
 
-            Thread.Sleep(300); // Attendre avant de recalculer le déplacement (miliseconds)
+            Thread.Sleep(300); // Wait before recalculating the detection
         }
+    }
+
+    private bool CheckFoodFishNearby()
+    {
+        // Get all colliders within the detection radius
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, detectionRadius);
+
+        // Check if any colliders are found (excluding self)
+        foreach (Collider2D collider in colliders)
+        {
+            if (collider.gameObject != gameObject) // Exclude self
+            {
+                // Perform logic based on the detected object
+                return true; // Return true as soon as one object is found
+            }
+        }
+
+        return false; // Return false if no objects are found
     }
 
 
@@ -47,14 +83,17 @@ public class Fish : MonoBehaviour
         
         Debug.Log("We hit : " + collision.rigidbody.name);
     }
-    
-    
+
+    // Draw gizmos in the scene view
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, detectionRadius);
+    }
 
     private void OnDestroy()
     {
         isRunning = false;
         fishThread.Join(); // Attendre que le thread du poisson se termine
     }
-
-   
 }
