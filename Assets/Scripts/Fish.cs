@@ -7,13 +7,14 @@ public class Fish : MonoBehaviour
 {
     public Rigidbody2D FishRigidbody; // Reference to the fish rigidbody
     public float detectionRadius = 2f; // Radius of the detection area
-    private float moveSpeed = 5f;
+    public float moveSpeed = 2f; 
 
     private Thread fishThread;
     private bool isRunning = true;
 
     private bool foodFishNearby = false;
     private object lockObject = new object(); // Object to lock access to shared data
+    private Vector2 foodFishDirection;
 
 
 
@@ -34,8 +35,7 @@ public class Fish : MonoBehaviour
         }
         if (nearby)
         {
-            Debug.Log("FoodFish is nearby!");
-            // Implement logic to move towards the foodFish or perform some action
+            //Debug.Log("FoodFish is nearby!"); //food fish detected
         }
     }
 
@@ -46,29 +46,61 @@ public class Fish : MonoBehaviour
             // Check for objects nearby on the Unity main thread
             UnityThreadHelper.ExecuteOnMainThread(() =>
             {
-                bool isNearby = CheckFoodFishNearby();
+                Vector2 foodFishDirection;
+                bool isNearby = CheckFoodFishNearby(out foodFishDirection);
                 lock (lockObject)
                 {
                     foodFishNearby = isNearby;
                 }
+
+                // Store the direction towards the food fish
+                lock (lockObject)
+                {
+                    this.foodFishDirection = foodFishDirection;
+                }
             });
 
+            //Move towards the food fish
+            if(foodFishNearby == true)
+            {
+                // Get the stored direction towards the food fish
+                Vector2 direction;
+                lock (lockObject)
+                {
+                    direction = foodFishDirection;
+                }
 
-            Thread.Sleep(300); // Wait before recalculating the detection
+                // Set the velocity of the fish towards the food fish on the main thread because I cannot set the velocity otherwise
+                UnityThreadHelper.ExecuteOnMainThread(() =>
+                {
+                    // Move the fish in that direction with the specified move speed
+                    FishRigidbody.velocity = direction.normalized * moveSpeed;
+                });
+            }
+            else
+            {
+                //Stop the fish if there is no food fish detected 
+
+            }
+
+            Thread.Sleep(500); // Wait before recalculating the detection (in milliseconds)
         }
     }
 
-    private bool CheckFoodFishNearby()
+    private bool CheckFoodFishNearby(out Vector2 foodFishDirection)
     {
+        foodFishDirection = Vector2.zero;
+
         // Get all colliders within the detection radius
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, detectionRadius);
 
         // Check if any colliders are found (excluding self)
         foreach (Collider2D collider in colliders)
         {
-            if (collider.gameObject != gameObject) // Exclude self
+            if (collider.gameObject != gameObject && collider.gameObject.tag == "FishFood") // Exclude self and check tag
             {
-                // Perform logic based on the detected object
+                //Debug.Log("FoodFish is nearby!"); //food fish detected
+                foodFishDirection = (collider.transform.position - transform.position).normalized;
                 return true; // Return true as soon as one object is found
             }
         }
@@ -80,8 +112,14 @@ public class Fish : MonoBehaviour
     //Called when the fish detect a collision 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        
         Debug.Log("We hit : " + collision.rigidbody.name);
+
+        if(collision.gameObject.tag == "FishFood")
+        {
+            Debug.Log("FoodFish is being destroyed!"); //food fish destroy
+            Destroy(collision.gameObject);
+        }
+
     }
 
     // Draw gizmos in the scene view
