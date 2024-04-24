@@ -43,6 +43,8 @@ public class Fish : MonoBehaviour
     {
         while (isRunning)
         {
+            float rotationAngle = 0f;
+
             // Check for objects nearby on the Unity main thread
             UnityThreadHelper.ExecuteOnMainThread(() =>
             {
@@ -57,6 +59,9 @@ public class Fish : MonoBehaviour
                 lock (lockObject)
                 {
                     this.foodFishDirection = foodFishDirection;
+
+                    // Calculate the angle between the fish's top corner (facing up) and the direction towards the food
+                    rotationAngle = Mathf.Atan2(foodFishDirection.y, foodFishDirection.x) * Mathf.Rad2Deg;
                 }
             });
 
@@ -75,15 +80,25 @@ public class Fish : MonoBehaviour
                 {
                     // Move the fish in that direction with the specified move speed
                     FishRigidbody.velocity = direction.normalized * moveSpeed;
+
+                    if(rotationAngle != 0.0f) // Only set the roation towards the food if the rotation angle is not 0 or null
+                    {
+                        // Adjust rotation to make the top corner face the food
+                        FishRigidbody.rotation = rotationAngle - 90f; // Adjusting by -90 degrees to make the top corner face the food
+                    }
                 });
             }
             else
             {
                 //Stop the fish if there is no food fish detected 
-
+                UnityThreadHelper.ExecuteOnMainThread(() =>
+                {
+                    // Stop the fish by setting its velocity to zero
+                    FishRigidbody.velocity = Vector2.zero;
+                });
             }
 
-            Thread.Sleep(500); // Wait before recalculating the detection (in milliseconds)
+            Thread.Sleep(250); // Wait before recalculating the detection (in milliseconds)
         }
     }
 
@@ -118,6 +133,9 @@ public class Fish : MonoBehaviour
         {
             Debug.Log("FoodFish is being destroyed!"); //food fish destroy
             Destroy(collision.gameObject);
+
+            //stop rotation after the collision
+            FishRigidbody.angularVelocity = 0f;
         }
 
     }
