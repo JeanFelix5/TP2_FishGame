@@ -109,18 +109,39 @@ public class Fish : MonoBehaviour
         // Get all colliders within the detection radius
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, detectionRadius);
 
-        // Check if any colliders are found (excluding self)
+        // Variables to store the closest distance and direction
+        float closestDistance = float.MaxValue;
+        Vector2 closestDirection = Vector2.zero;
+
+        // Iterate through all colliders
         foreach (Collider2D collider in colliders)
         {
-            if (collider.gameObject != gameObject && collider.gameObject.tag == "FishFood") // Exclude self and check tag
+            if (collider.gameObject != gameObject && collider.gameObject.tag == "FishFood")
             {
-                //Debug.Log("FoodFish is nearby!"); //food fish detected
-                foodFishDirection = (collider.transform.position - transform.position).normalized;
-                return true; // Return true as soon as one object is found
+                // Calculate direction to the food fish
+                Vector2 directionToFood = (collider.transform.position - transform.position).normalized;
+
+                // Calculate distance to the food fish
+                float distanceToFood = Vector2.Distance(transform.position, collider.transform.position);
+
+                // Update closest direction if this food fish is closer
+                if (distanceToFood < closestDistance)
+                {
+                    closestDistance = distanceToFood;
+                    closestDirection = directionToFood;
+                }
             }
         }
 
-        return false; // Return false if no objects are found
+        // If a food fish was found, return its direction
+        if (closestDistance < float.MaxValue)
+        {
+            foodFishDirection = closestDirection;
+            return true;
+        }
+
+        // Return false if no food fish are found
+        return false;
     }
 
 
@@ -131,7 +152,7 @@ public class Fish : MonoBehaviour
 
         if(collision.gameObject.tag == "FishFood")
         {
-            Debug.Log("FoodFish is being destroyed!"); //food fish destroy
+            //Debug.Log("FoodFish is being destroyed!"); //food fish destroy
             Destroy(collision.gameObject);
 
             //stop rotation after the collision
