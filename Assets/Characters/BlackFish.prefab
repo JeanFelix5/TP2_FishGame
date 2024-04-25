@@ -102,7 +102,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   FishRigidbody: {fileID: 4673832390763444735}
   detectionRadius: 8
-  moveSpeed: 2
+  moveSpeed: 1
 --- !u!114 &5655286656144197768
 MonoBehaviour:
   m_ObjectHideFlags: 0

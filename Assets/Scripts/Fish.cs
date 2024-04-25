@@ -12,10 +12,10 @@ public class Fish : MonoBehaviour
     private Thread fishThread;
     private bool isRunning = true;
 
-    private bool foodFishNearby = false;
+    private bool FishFoodNearby = false;
     private object lockObject = new object(); // Object to lock access to shared data
     private Vector2 foodFishDirection;
-
+    private float ChangeDirectionProbability = 0f;
 
 
     // Start is called before the first frame update
@@ -31,7 +31,7 @@ public class Fish : MonoBehaviour
         bool nearby;
         lock (lockObject)
         {
-            nearby = foodFishNearby;
+            nearby = FishFoodNearby;
         }
         if (nearby)
         {
@@ -44,6 +44,14 @@ public class Fish : MonoBehaviour
         while (isRunning)
         {
             float rotationAngle = 0f;
+            
+            UnityThreadHelper.ExecuteOnMainThread(() =>
+            {
+                lock (lockObject)
+                {
+                    ChangeDirectionProbability = Random.Range(0f, 1f); // Determine whether the fish should change direction
+                }
+            });
 
             // Check for objects nearby on the Unity main thread
             UnityThreadHelper.ExecuteOnMainThread(() =>
@@ -52,7 +60,7 @@ public class Fish : MonoBehaviour
                 bool isNearby = CheckFoodFishNearby(out foodFishDirection);
                 lock (lockObject)
                 {
-                    foodFishNearby = isNearby;
+                    FishFoodNearby = isNearby;
                 }
 
                 // Store the direction towards the food fish
@@ -65,40 +73,74 @@ public class Fish : MonoBehaviour
                 }
             });
 
-            //Move towards the food fish
-            if(foodFishNearby == true)
+            // Occasionally change direction randomly
+            if (ChangeDirectionProbability < 0.1f && FishFoodNearby == true)
             {
-                // Get the stored direction towards the food fish
-                Vector2 direction;
-                lock (lockObject)
-                {
-                    direction = foodFishDirection;
-                }
+                //Debug.Log("Change direction!! shouldChangeDirection: " + ChangeDirectionProbability); // Log the value of shouldChangeDirection
 
-                // Set the velocity of the fish towards the food fish on the main thread because I cannot set the velocity otherwise
+                // Randomly choose a new direction within the main thread
+                Vector2 randomDirection = Vector2.zero;
                 UnityThreadHelper.ExecuteOnMainThread(() =>
                 {
-                    // Move the fish in that direction with the specified move speed
-                    FishRigidbody.velocity = direction.normalized * moveSpeed;
-
-                    if(rotationAngle != 0.0f) // Only set the roation towards the food if the rotation angle is not 0 or null
+                    lock (lockObject)
                     {
-                        // Adjust rotation to make the top corner face the food
-                        FishRigidbody.rotation = rotationAngle - 90f; // Adjusting by -90 degrees to make the top corner face the food
+                        randomDirection = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized;
                     }
+                });
+
+                // Set the velocity of the fish towards the random direction on the main thread
+                UnityThreadHelper.ExecuteOnMainThread(() =>
+                {
+                    FishRigidbody.velocity = randomDirection * moveSpeed;
+
+                    // Adjust rotation to face the new direction
+                    float randomRotationAngle = Mathf.Atan2(randomDirection.y, randomDirection.x) * Mathf.Rad2Deg;
+                    FishRigidbody.rotation = randomRotationAngle - 90f; // Adjusting by -90 degrees to make the top corner face the direction
+
+                    // Stop rotation 
+                    FishRigidbody.angularVelocity = 0f;
                 });
             }
             else
             {
-                //Stop the fish if there is no food fish detected 
-                UnityThreadHelper.ExecuteOnMainThread(() =>
+                //Move towards the fish food
+                if (FishFoodNearby == true)
                 {
-                    // Stop the fish by setting its velocity to zero
-                    FishRigidbody.velocity = Vector2.zero;
-                });
+                    // Get the stored direction towards the food fish
+                    Vector2 direction;
+                    lock (lockObject)
+                    {
+                        direction = foodFishDirection;
+                    }
+
+                    // Set the velocity of the fish towards the fish food on the main thread
+                    UnityThreadHelper.ExecuteOnMainThread(() =>
+                    {
+                        // Move the fish in that direction with the specified move speed
+                        FishRigidbody.velocity = direction.normalized * moveSpeed;
+
+                        if (rotationAngle != 0.0f) // Only set the rotation towards the food if the rotation angle is not 0 or null
+                        {
+                            // Adjust rotation to make the top corner face the food
+                            FishRigidbody.rotation = rotationAngle - 90f; // Adjusting by -90 degrees to make the top corner face the food
+                        }
+                    });
+                }
+                else
+                {
+                    // Stop the fish if there is no food fish detected 
+                    UnityThreadHelper.ExecuteOnMainThread(() =>
+                    {
+                        // Stop the fish by setting its velocity to zero
+                        FishRigidbody.velocity = Vector2.zero;
+
+                        // Stop rotation 
+                        FishRigidbody.angularVelocity = 0f;
+                    });
+                }
             }
 
-            Thread.Sleep(250); // Wait before recalculating the detection (in milliseconds)
+            Thread.Sleep(400); // Wait before recalculating the detection (in milliseconds)
         }
     }
 
@@ -160,12 +202,15 @@ public class Fish : MonoBehaviour
             // Check if the object that received the collision and the current fish both implement the same tag by comparing them
             if (collision.gameObject.CompareTag(this.tag)) 
             {
-                // Destroy the collided FoodFish immediately 
-                Destroy(collision.gameObject);
+                lock (lockObject)   // Only one fish at a time can eat the food, prevent errors if two fish try to eat the food at the same time
+                {
+                    // Destroy the collided FoodFish immediately 
+                    Destroy(collision.gameObject);
+                }
 
                 // Stop rotation after the collision
                 FishRigidbody.angularVelocity = 0f;
-                
+
                 //Debug.Log("FoodFish is being destroyed!"); // food fish destroy
             }
         }
