@@ -6,7 +6,7 @@
 
 ## Instructions pour interagir avec notre simulation:
 Le jeu se joue à la souris  
-Le **clic gauche** fait apparaitre de la nourriture noire,
+Le **clic gauche** fait apparaitre de la nourriture noire,   
 Le **clic droit** fait apparaitre de la nourriture blanche  
 
 ## Comment démarrer la simulation ?
