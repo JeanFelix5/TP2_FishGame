@@ -7,13 +7,15 @@
 ## Instructions pour interagir avec notre simulation:
 Le jeu se joue à la souris  
 Le **clic gauche** fait apparaitre de la nourriture noire,   
-Le **clic droit** fait apparaitre de la nourriture blanche  
+Le **clic droit** fait apparaitre de la nourriture blanche   
+Pour quitter le jeu, appuyer sur **AltF4**
 
 ## Comment démarrer la simulation ?
 Vous pourrez trouver dans ce projet tout les fichiers/Scripts **C#** que nous avons utilisés pour faire ce projet.  
 Le projet peut se lancer avec **Unity** que vous pouvez télécharger avec UnityHub  
 
-Pour le confort d'utilisation, nous avons créés deux fichier exécutable. Un pour **Windows** et un pour **MacOS**.  
+Nous avons créé un fichier exécutable pour **Windows**, car vous nous avez dit que vous aviez une VM Windows et nous n'avons pas pu tester d'exécutable autre que sur Windows.   
+Le fichier exécutable se trouve dans le dossier Executable/BuildWindows/FishGame.exe
 
 ## Spécifications
 La version d'Unity que nous avons utilisé est la 2022.3.22f1    
