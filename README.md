@@ -6,8 +6,8 @@
 
 ## Instructions pour interagir avec notre simulation:
 Le jeu se joue à la souris  
-Le **clic droit** fait apparaitre de la nourriture blanche,  
-Le **clic gauche** fait apparaitre de la nourriture noire
+Le **clic gauche** fait apparaitre de la nourriture noire,
+Le **clic droit** fait apparaitre de la nourriture blanche  
 
 ## Comment démarrer la simulation ?
 Vous pourrez trouver dans ce projet tout les fichiers/Scripts **C#** que nous avons utilisés pour faire ce projet.  
