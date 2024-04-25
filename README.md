@@ -20,7 +20,8 @@ Le fichier exécutable se trouve dans le dossier Executable/BuildWindows/FishGam
 ## Spécifications
 La version d'Unity que nous avons utilisé est la 2022.3.22f1    
 Notre IDE est Microsoft Visual Studio Community 2022  
-Nous avons fait le code sous Windows  
+Nous avons fait le code sous Windows   
+**Tout le code que nous avons produit se trouve dans le fichier Assets/Scripts/**
 
 ### Les modules d'Unity
 ### Dev Tools
